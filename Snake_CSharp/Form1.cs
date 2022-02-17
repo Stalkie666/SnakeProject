@@ -23,7 +23,10 @@ namespace Snake_CSharp
 
         Random rand = new Random();
 
-        bool goLeft, goRight, goDown, goUp;
+        bool    goLeft = false,
+                goRight = false, 
+                goDown = false, 
+                goUp = false;
 
 
         public Form1()
@@ -59,12 +62,31 @@ namespace Snake_CSharp
 
         private void KeyIsUp(object sender, KeyEventArgs e)
         {
-
+            if (e.KeyCode == Keys.Left )
+            {
+                goLeft = false;
+            }
+            else if (e.KeyCode == Keys.Right )
+            {
+                goRight = false;
+            }
+            else if (e.KeyCode == Keys.Up )
+            {
+                goUp = false;
+            }
+            else if (e.KeyCode == Keys.Down )
+            {
+                goDown = false;
+            }
+            else
+            {
+                //do nothing
+            }
         }
 
         private void btnStartGame(object sender, EventArgs e)
         {
-
+            RestartGame();
         }
 
         private void takeSnapShot(object sender, EventArgs e)
@@ -74,11 +96,101 @@ namespace Snake_CSharp
 
         private void gameTimerEvent(object sender, EventArgs e)
         {
+            //setting direction
+            if (goLeft)
+            {
+                Settings.direction = "left";
+            }
+            if (goRight)
+            {
+                Settings.direction = "right";
+            }
+            if (goUp)
+            {
+                Settings.direction = "up";
+            }
+            if (goDown)
+            {
+                Settings.direction = "down";
+            }
+
+
+            for(int i = Snake.Count; i >= 0; --i)
+            {
+                if(i == 0)
+                {
+                    switch (Settings.direction)
+                    {
+                        case "left":
+                            Snake[i].X--;
+                            break;
+                        case "right":
+                            Snake[i].X++;
+                            break;
+                        case "up":
+                            Snake[i].Y--;
+                            break;
+                        case "down":
+                            Snake[i].Y++;
+                            break;
+                    }
+                }
+
+                if(Snake[i].X < 0)
+                {
+                    Snake[i].X = maxWidth;
+                }
+                if(Snake[i].X > maxWidth)
+                {
+                    Snake[i].X = 0;
+                }
+
+                if (Snake[i].Y < 0)
+                {
+                    Snake[i].Y = maxHeight;
+                }
+                if (Snake[i].Y > maxHeight)
+                {
+                    Snake[i].Y = 0;
+                }
+
+            }
 
         }
 
         private void UpdatePictureBoxGraphic(object sender, PaintEventArgs e)
         {
+            Graphics canvas = e.Graphics;
+            Brush snakeColor;
+
+            for(int i = 0; i < Snake.Count; ++i)
+            {
+                if(i == 0)
+                {
+                    snakeColor = Brushes.Black;
+                }
+                else
+                {
+                    snakeColor = Brushes.DarkGreen;
+                }
+
+                canvas.FillEllipse( snakeColor, 
+                                    new Rectangle(  Snake[i].X * Settings.Width,
+                                                    Snake[i].Y  * Settings.Height,
+                                                    Settings.Width,Settings.Height
+                                                )
+                                    );
+            }
+
+            canvas.FillEllipse( Brushes.DarkRed,
+                                new Rectangle(  food[i].X * Settings.Width,
+                                                food[i].Y * Settings.Height,
+                                                Settings.Width, Settings.Height
+                                                )
+                             );
+
+
+
 
         }
 
@@ -86,6 +198,30 @@ namespace Snake_CSharp
         //custom functions
         private void RestartGame()
         {
+            maxWidth = picCanvas.Width / Settings.Width - 1;
+            maxHeight = picCanvas.Height / Settings.Height - 1;
+
+            Snake.Clear();
+
+            btnStart.Enabled = false;
+            btnSnap.Enabled = false;
+
+            score = 0;
+
+            txtScore.Text = "Score: " + score;
+
+            Circle head = new Circle { X = 10, Y = 5 };
+            Snake.Add(head); // snakes' head is first on the list
+
+            for(int i = 0; i < 10; ++i)
+            {
+                Circle body = new Circle();
+                Snake.Add(body);
+            }
+
+            food = new Circle { X = rand.Next(2, maxWidth), Y = rand.Next(2, maxHeight) };
+
+            gameTimer.Start();
 
         }
 
