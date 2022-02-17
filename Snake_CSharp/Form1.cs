@@ -115,7 +115,7 @@ namespace Snake_CSharp
             }
 
 
-            for(int i = Snake.Count; i >= 0; --i)
+            for(int i = Snake.Count - 1; i >= 0; --i)
             {
                 if(i == 0)
                 {
@@ -134,27 +134,51 @@ namespace Snake_CSharp
                             Snake[i].Y++;
                             break;
                     }
+
+                    if (Snake[i].X < 0)
+                    {
+                        Snake[i].X = maxWidth;
+                    }
+                    if (Snake[i].X > maxWidth)
+                    {
+                        Snake[i].X = 0;
+                    }
+
+                    if (Snake[i].Y < 0)
+                    {
+                        Snake[i].Y = maxHeight;
+                    }
+                    if (Snake[i].Y > maxHeight)
+                    {
+                        Snake[i].Y = 0;
+                    }
+
+
+                    if(Snake[i].X == food.X && Snake[i].Y == food.Y)
+                    {
+                        EatFood();
+                    }
+
+                    for(int j = 1; j < Snake.Count; ++j)
+                    {
+                        if(Snake[i].X == Snake[j].X && Snake[i].Y == Snake[j].Y)
+                        {
+                            GameOver();
+                        }
+                    }
+
+                }
+                else
+                {
+                    Snake[i].X = Snake[i - 1].X;
+                    Snake[i].Y = Snake[i - 1].Y;
                 }
 
-                if(Snake[i].X < 0)
-                {
-                    Snake[i].X = maxWidth;
-                }
-                if(Snake[i].X > maxWidth)
-                {
-                    Snake[i].X = 0;
-                }
-
-                if (Snake[i].Y < 0)
-                {
-                    Snake[i].Y = maxHeight;
-                }
-                if (Snake[i].Y > maxHeight)
-                {
-                    Snake[i].Y = 0;
-                }
+                
 
             }
+
+            picCanvas.Invalidate();
 
         }
 
@@ -182,9 +206,9 @@ namespace Snake_CSharp
                                     );
             }
 
-            canvas.FillEllipse( Brushes.DarkRed,
-                                new Rectangle(  food[i].X * Settings.Width,
-                                                food[i].Y * Settings.Height,
+                canvas.FillEllipse( Brushes.DarkRed,
+                                new Rectangle(  food.X * Settings.Width,
+                                                food.Y * Settings.Height,
                                                 Settings.Width, Settings.Height
                                                 )
                              );
@@ -213,26 +237,49 @@ namespace Snake_CSharp
             Circle head = new Circle { X = 10, Y = 5 };
             Snake.Add(head); // snakes' head is first on the list
 
-            for(int i = 0; i < 10; ++i)
+            for(int i = 0; i < 20; ++i)
             {
                 Circle body = new Circle();
                 Snake.Add(body);
             }
 
             food = new Circle { X = rand.Next(2, maxWidth), Y = rand.Next(2, maxHeight) };
-
+      
             gameTimer.Start();
 
         }
 
         private void EatFood()
         {
+            score++;
+            txtScore.Text = "Score: " + score;
 
+            Circle body = new Circle
+            {
+                X = Snake[Snake.Count - 1].X,
+                Y = Snake[Snake.Count - 1].Y
+            };
+
+            Snake.Add(body);
+
+            food = new Circle { X = rand.Next(2, maxWidth), Y = rand.Next(2, maxHeight) };
         }
 
         private void GameOver()
         {
+            gameTimer.Stop();
+            btnStart.Enabled = true;
+            btnSnap.Enabled = true;
 
+            if(score > hightScore)
+            {
+                hightScore = score;
+
+                txtHightScore.Text = "Hight Score: " +  hightScore;
+                txtHightScore.ForeColor = Color.Maroon;
+            }
+
+            
         }
     }
 }
